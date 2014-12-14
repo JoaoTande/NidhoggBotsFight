@@ -12,16 +12,16 @@ float Arena::OrangePX;
 float Arena::OrangePY;
 int Arena::Runner;
 
-DWORD Arena::getPlayerOnePosition(HWND hwnd, DWORD pid, HANDLE phandle){
+float Arena::getPlayerOnePosition(HWND hwnd, DWORD pid, HANDLE phandle){
 	DWORD address;
-	DWORD value;
+	float value;
 
 	address = getAndressPositionXYellow(hwnd, pid, phandle);
 	ReadProcessMemory(phandle, (LPVOID)address, &value, sizeof(value), 0);
 	return value;
 }
 
-DWORD Arena::setPlayerOnePosition(HWND hwnd, DWORD pid, HANDLE phandle, DWORD value){
+DWORD Arena::setPlayerOnePosition(HWND hwnd, DWORD pid, HANDLE phandle, float value){
 	DWORD address;
 
 	address = getAndressPositionXYellow(hwnd, pid, phandle);
@@ -29,16 +29,16 @@ DWORD Arena::setPlayerOnePosition(HWND hwnd, DWORD pid, HANDLE phandle, DWORD va
 	return value;
 }
 
-DWORD Arena::getPlayerTwoPosition(HWND hwnd, DWORD pid, HANDLE phandle){
+float Arena::getPlayerTwoPosition(HWND hwnd, DWORD pid, HANDLE phandle){
 	DWORD address;
-	DWORD value;
+	float value;
 
 	address = getAndressPositionXOrange(hwnd, pid, phandle);
 	ReadProcessMemory(phandle, (LPVOID)address, &value, sizeof(value), 0);
 	return value;
 }
 
-DWORD Arena::setPlayerTwoPosition(HWND hwnd, DWORD pid, HANDLE phandle, DWORD value){
+DWORD Arena::setPlayerTwoPosition(HWND hwnd, DWORD pid, HANDLE phandle, float value){
 	DWORD address;
 
 	address = getAndressPositionXOrange(hwnd, pid, phandle);
@@ -48,12 +48,12 @@ DWORD Arena::setPlayerTwoPosition(HWND hwnd, DWORD pid, HANDLE phandle, DWORD va
 
 void Arena::playerOne(HWND hwnd, DWORD pid, HANDLE phandle){//Control averything about player ONE
 	DWORD value;
-
+	int f;
 	while (1){
-		apertaA(0);
+		apertaA(0,&f);
 		apertaG(0);
 		apertaF();
-		apertaD(100);
+		apertaD(100,&f);
 		apertaG(0);
 		apertaF();
 	}
@@ -61,12 +61,12 @@ void Arena::playerOne(HWND hwnd, DWORD pid, HANDLE phandle){//Control averything
 
 void Arena::playerTwo(HWND hwnd, DWORD pid, HANDLE phandle){//Control everything about player TWO.
 	DWORD value;
-
+	int f;
 	while (1){
 		apertaM(0);
 		apertaN();
-		apertaRightNarrow(0);
-		apertaLeftNarrow(0);
+		apertaRightNarrow(0,&f);
+		apertaLeftNarrow(0,&f);
 	}
 }
 
@@ -181,36 +181,39 @@ void Arena::apertaG(int delay)
 // ver site http://www.codeproject.com/Articles/7305/Keyboard-Events-Simulation-using-keybd-event-funct
 {
 	keybd_event(VkKeyScan('G'), 0xa2, 0, 0); // ‘A’ Press
-	Sleep(600);//O pulo pode demorar de 0 até 600 tempos do sleep (pulo completo = 600)
+	Sleep(delay);//O pulo pode demorar de 0 até 600 tempos do sleep (pulo completo = 600)
 	keybd_event(VkKeyScan('G'), 0xa2, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
 }
 
-void Arena::apertaA(int delay)
+void Arena::apertaA(int delay, int *f)
 // ver site http://www.codeproject.com/Articles/7305/Keyboard-Events-Simulation-using-keybd-event-funct
 {
 	keybd_event(VkKeyScan('A'), 0x9e, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VkKeyScan('A'), 0x9e, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
+	*f = 0;//Make flag f(flagFreeHorizontal) free to other thread starts.
 }
 
-void Arena::apertaLeftNarrow(int delay)
+void Arena::apertaLeftNarrow(int delay, int *f)
 // ver site http://www.codeproject.com/Articles/7305/Keyboard-Events-Simulation-using-keybd-event-funct
 {
 	keybd_event(VK_LEFT, 0x9e, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VK_LEFT, 0x9e, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
+	*f = 0;//Make flag f(flagFreeHorizontal) free to other thread starts.
 }
 
-void Arena::apertaRightNarrow(int delay)
+void Arena::apertaRightNarrow(int delay, int *f)
 // ver site http://www.codeproject.com/Articles/7305/Keyboard-Events-Simulation-using-keybd-event-funct
 {
 	keybd_event(VK_RIGHT, 0x9e, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VK_RIGHT, 0x9e, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
+	*f = 0;//Make flag f(flagFreeHorizontal) free to other thread starts.
 }
 
 
@@ -232,48 +235,49 @@ void Arena::apertaN()
 	Sleep(10);
 }
 
-void Arena::apertaD(int delay)
+void Arena::apertaD(int delay, int *f)
 //see web site http://www.codeproject.com/Articles/7305/Keyboard-Events-Simulation-using-keybd-event-funct
 {
 	keybd_event(VkKeyScan('D'), 0xa0, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VkKeyScan('D'), 0xa0, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
+	*f = 0;//Make flag f(flagFreeHorizontal) free to other thread starts.
 }
 
 void Arena::apertaM(int delay)
 //see web site http://www.codeproject.com/Articles/7305/Keyboard-Events-Simulation-using-keybd-event-funct
 {
 	keybd_event(VkKeyScan('M'), 0xb2, 0, 0); // ‘M’ Press
-	Sleep(600);
+	Sleep(delay);
 	keybd_event(VkKeyScan('M'), 0xb2, KEYEVENTF_KEYUP, 0); // ‘M’ Release
 	Sleep(10);
 }
 
 void Arena::apertaS(int delay){
 	keybd_event(VkKeyScan('S'), 0x9f, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VkKeyScan('S'), 0x9f, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
 }
 
 void Arena::apertaDownNarrow(int delay){
 	keybd_event(VK_DOWN, 0x9e, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VK_DOWN, 0x9e, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
 }
 
 void Arena::apertaUpNarrow(int delay){
 	keybd_event(VK_UP, 0x9e, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VK_UP, 0x9e, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
 }
 
 void Arena::apertaW(int delay){
 	keybd_event(VkKeyScan('W'), 0x91, 0, 0); // ‘A’ Press
-	Sleep(1000);
+	Sleep(delay);
 	keybd_event(VkKeyScan('W'), 0x91, KEYEVENTF_KEYUP, 0); // ‘A’ Release
 	Sleep(10);
 }
@@ -287,8 +291,28 @@ void Arena::setPlayerOrange(Character& po){
 }
 
 void Arena::updateInformations(){
-	(*Player1Yellow).updateInformation(YellowPX, YellowPY, OrangePX, OrangePY, Runner);
-	(*Player2Orange).updateInformation(OrangePX, OrangePY, YellowPX, YellowPY, Runner);
+	
+	int RunnerYellow, RunnerOrange;
+
+	if (Runner == 1){// Runner 0 nobody is running (starting game), Runner 1 Yellow is running, Runner 2 Orange is Running, Runner 3 == fail.
+		RunnerYellow = 1;
+		RunnerOrange = 2;
+	}
+	if (Runner == 2){// Runner 0 nobody is running (starting game), Runner 1 Yellow is running, Runner 2 Orange is Running, Runner 3 == fail.
+		RunnerYellow = 2;
+		RunnerOrange = 1;
+	}
+	if (Runner == 0){// Runner 0 nobody is running (starting game), Runner 1 Yellow is running, Runner 2 Orange is Running, Runner 3 == fail.
+		RunnerYellow = 0;
+		RunnerOrange = 0;
+	}
+	if (Runner == 3){// Runner 0 nobody is running (starting game), Runner 1 Yellow is running, Runner 2 Orange is Running, Runner 3 == fail.
+		RunnerYellow = 3;
+		RunnerOrange = 3;
+	}
+
+	(*Player1Yellow).updateInformation(YellowPX, YellowPY, OrangePX, OrangePY, RunnerYellow);
+	(*Player2Orange).updateInformation(OrangePX, OrangePY, YellowPX, YellowPY, RunnerOrange);
 }
 
 Arena::Arena(){
@@ -349,8 +373,8 @@ void Arena::fight(){
 	while (1){
 		//YellowPY;
 		//OrangePY;
-		YellowPX =  (float)getPlayerOnePosition(hwnd, pid, phandle);
-		OrangePX =  (float)getPlayerTwoPosition(hwnd, pid, phandle);
+		YellowPX =  getPlayerOnePosition(hwnd, pid, phandle);
+		OrangePX =  getPlayerTwoPosition(hwnd, pid, phandle);
 		Runner = getRunner(hwnd, pid, phandle);
 		updateInformations();
 	}
@@ -359,6 +383,8 @@ void Arena::fight(){
 void Arena::startFight(){
 	findGame();// Find the PID HANDLER AND PHANDLER of the game.
 	updateControls();// Link the commands with the characters.
+	(*Player1Yellow).setAvatarColor(1);
+	(*Player2Orange).setAvatarColor(2);
 	thread first(fight);// Start the Thread.
 	first.detach();// Avoid kernel stop thead after the function is over.
 }
